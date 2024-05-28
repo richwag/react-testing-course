@@ -3,31 +3,42 @@ import { render, screen, waitFor } from "@testing-library/react";
 import ProductDetail from "./ProductDetail.tsx";
 import { server } from "../mocks/server.ts";
 import { http, HttpResponse } from "msw";
+import { db } from "../mocks/handlers.ts";
 
 describe("ProductDetail", () => {
-  it("should render the product details when a product is found", async () => {
-    server.use(
-      http.get("/products/:id", ({ params }) => {
-        return HttpResponse.json({ id: 1, name: "Product 1", price: 100 });
-      }),
+  const productIds = [1];
+  const products = productIds.map((id) => db.product.create({ id }));
+
+  beforeAll(() => {});
+
+  afterAll(() => {
+    productIds.forEach((id) =>
+      db.product.delete({ where: { id: { equals: id } } }),
     );
 
+    server.resetHandlers();
+  });
+
+  it("should render the product details when a product is found", async () => {
     render(<ProductDetail productId={1} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Product 1/i)).toBeInTheDocument();
-      expect(screen.getByText(/100/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(products[0].name)),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(products[0].price.toString())),
+      ).toBeInTheDocument();
     });
   });
 
   it("should render not found when a product is not found", async () => {
     server.use(
       http.get("/products/:id", ({ params }) => {
-        return HttpResponse.text("Product not found", { status: 404 });
+        return HttpResponse.text("Not found", { status: 404 });
       }),
     );
-
-    render(<ProductDetail productId={1} />);
+    render(<ProductDetail productId={4} />);
 
     await waitFor(() => {
       expect(screen.getByText(/not found/i)).toBeInTheDocument();
