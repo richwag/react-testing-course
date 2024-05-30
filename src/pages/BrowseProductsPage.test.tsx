@@ -8,13 +8,24 @@ import { CartProvider } from "../providers/CartProvider.tsx";
 import { LanguageProvider } from "../providers/language/LanguageProvider.tsx";
 import delay from "delay";
 import { userEvent } from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 function renderComponent() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   render(
     <CartProvider>
       <LanguageProvider language="en">
         <Theme>
-          <BrowseProductsPage />
+          <QueryClientProvider client={queryClient}>
+            <BrowseProductsPage />
+          </QueryClientProvider>
         </Theme>
       </LanguageProvider>
     </CartProvider>,
@@ -38,13 +49,13 @@ describe("BrowseProductsPage", () => {
 
   it("should render all products", async () => {
     server.use(
-      http.get("/products", async ({ params }) => {
+      http.get("/products", async () => {
         console.log("products", products);
         return HttpResponse.json(products);
       }),
     );
     server.use(
-      http.get("/categories", async ({ params }) => {
+      http.get("/categories", async () => {
         return HttpResponse.json([]);
       }),
     );
@@ -60,12 +71,12 @@ describe("BrowseProductsPage", () => {
 
   it("should render all categories", async () => {
     server.use(
-      http.get("/products", async ({ params }) => {
+      http.get("/products", async ({}) => {
         return HttpResponse.json(products);
       }),
     );
     server.use(
-      http.get("/categories", async ({ params }) => {
+      http.get("/categories", async ({}) => {
         return HttpResponse.json(categories);
       }),
     );
@@ -82,13 +93,13 @@ describe("BrowseProductsPage", () => {
 
   it("should render product skeletons while loading", async () => {
     server.use(
-      http.get("/products", async ({ params }) => {
+      http.get("/products", async ({}) => {
         await delay(700);
         return HttpResponse.json([]);
       }),
     );
     server.use(
-      http.get("/categories", async ({ params }) => {
+      http.get("/categories", async ({}) => {
         return HttpResponse.json([]);
       }),
     );
@@ -101,12 +112,12 @@ describe("BrowseProductsPage", () => {
 
   it("should render category skeleton while loading", async () => {
     server.use(
-      http.get("/products", async ({ params }) => {
+      http.get("/products", async ({}) => {
         return HttpResponse.json(products);
       }),
     );
     server.use(
-      http.get("/categories", async ({ params }) => {
+      http.get("/categories", async ({}) => {
         await delay(900);
         return HttpResponse.json(categories);
       }),
@@ -121,12 +132,12 @@ describe("BrowseProductsPage", () => {
 
   it("should select products by category", async () => {
     server.use(
-      http.get("/products", async ({ params }) => {
+      http.get("/products", async ({}) => {
         return HttpResponse.json(products);
       }),
     );
     server.use(
-      http.get("/categories", async ({ params }) => {
+      http.get("/categories", async ({}) => {
         return HttpResponse.json(categories);
       }),
     );
