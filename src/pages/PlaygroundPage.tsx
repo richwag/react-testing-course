@@ -1,7 +1,7 @@
-import Onboarding from "../components/Onboarding";
+import BrowseProductsPage from "./BrowseProductsPage.tsx";
 
 const PlaygroundPage = () => {
-  return <Onboarding />;
+  return <BrowseProductsPage />;
 };
 
 export default PlaygroundPage;

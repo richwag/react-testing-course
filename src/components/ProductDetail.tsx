@@ -20,8 +20,6 @@ const ProductDetail = ({ productId }: { productId: number }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  console.log(product);
-
   if (isLoading) return <div>Loading...</div>;
 
   if (error) return <div>Error: {error}</div>;

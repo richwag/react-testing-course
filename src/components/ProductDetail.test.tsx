@@ -1,9 +1,15 @@
 import { describe } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import ProductDetail from "./ProductDetail.tsx";
 import { server } from "../mocks/server.ts";
 import { http, HttpResponse } from "msw";
 import { db } from "../mocks/handlers.ts";
+import delay from "delay";
 
 describe("ProductDetail", () => {
   const productIds = [1];
@@ -48,7 +54,7 @@ describe("ProductDetail", () => {
   it("should render error when an error happens", async () => {
     server.use(
       http.get("/products/:id", ({ params }) => {
-        return HttpResponse.text("Error", { status: 500 });
+        return HttpResponse.error();
       }),
     );
 
@@ -56,6 +62,36 @@ describe("ProductDetail", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+  });
+
+  it("should render the loading indicator when loading", async () => {
+    server.use(
+      http.get("/products/:id", async ({ params }) => {
+        await delay(1000);
+        return HttpResponse.json(products[0]);
+      }),
+    );
+
+    render(<ProductDetail productId={1} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    });
+  });
+
+  it("should remove the loading indicator when done loading", async () => {
+    server.use(
+      http.get("/products/:id", async ({ params }) => {
+        await delay(500);
+        return HttpResponse.json(products[0]);
+      }),
+    );
+
+    render(<ProductDetail productId={1} />);
+
+    waitForElementToBeRemoved(screen.getByText(/loading/i), {
+      timeout: 1000,
     });
   });
 });
