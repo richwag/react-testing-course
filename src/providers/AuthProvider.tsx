@@ -8,11 +8,11 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const domain = import.meta.env.VITE_AUTH0_DOMAIN;
   const clientId = import.meta.env.VITE_AUTH0_CLIENTID;
 
-  if (!domain || !clientId) {
-    throw new Error(
-      "Auth0 is not configured. Follow the instruction on README.md."
-    );
-  }
+  // if (!domain || !clientId) {
+  //   throw new Error(
+  //     "Auth0 is not configured. Follow the instruction on README.md."
+  //   );
+  // }
 
   return (
     <Auth0Provider
