@@ -12,6 +12,8 @@ afterAll(() => {
   server.close();
 });
 
+vi.mock("@auth0/auth0-react");
+
 global.ResizeObserver = ResizeObserver;
 Object.defineProperty(window, "matchMedia", {
   writable: true,
